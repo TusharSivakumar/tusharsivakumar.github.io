@@ -1,0 +1,95 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 12%;
+    --border: 40 15% 91%;
+  }
+
+  body {
+    @apply font-sans bg-background text-foreground antialiased;
+    font-feature-settings: "kern", "liga", "clig", "calt";
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  @media (max-width: 767px) {
+    button,
+    a[role="button"] {
+      min-height: 44px;
+    }
+  }
+}
+
+/* ---- Brand gradient ------------------------------------------------------ */
+.bg-brand-gradient {
+  background-image: linear-gradient(135deg, #1e40af 0%, #2563eb 45%, #0ea5e9 100%);
+}
+.text-gradient {
+  background-image: linear-gradient(120deg, #1e3a8a 0%, #2563eb 50%, #0ea5e9 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ---- Scroll-reveal ------------------------------------------------------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+}
+.reveal-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ---- Hero entrance ------------------------------------------------------- */
+@keyframes hero-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-hero {
+  animation: hero-in 0.8s ease-out both;
+}
+.animate-hero-delay {
+  animation: hero-in 0.8s ease-out 0.15s both;
+}
+
+@keyframes bounce-slow {
+  0%, 100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) translateY(6px);
+  }
+}
+.animate-bounce-slow {
+  animation: bounce-slow 2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .animate-hero,
+  .animate-hero-delay,
+  .animate-bounce-slow {
+    animation: none;
+  }
+}
