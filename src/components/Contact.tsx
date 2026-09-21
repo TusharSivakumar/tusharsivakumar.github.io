@@ -28,10 +28,10 @@ const Contact = () => {
             Contact
           </p>
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-            Get in touch.
+            Let's make something new.
           </h2>
           <p className="mt-4 text-[16px] leading-[1.6] text-white/85 max-w-lg mx-auto">
-            Have a project, opportunity, or just want to talk shop? Send me
+            Have a project, opportunity, or just want to talk? Send me
             an email or find me on LinkedIn.
           </p>
 
