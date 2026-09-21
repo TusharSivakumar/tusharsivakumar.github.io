@@ -15,13 +15,13 @@ export const profile = {
 
   hero: {
     blurb:
-      "I'm a high schooler from Acton, MA. Most of my time goes into computer science, AI, and robotics — through research programs, teaching, and just building things.",
+      "I am a junior from Acton, MA. Most of my time goes into computer science, AI, and robotics. Additionally, I do my own research, play the drums, and listen to a lot of music. I also love to bike.
   },
 
   about: [
-    "I'm a student at Acton-Boxborough Regional High School. I got into computer science because I liked figuring out how things work, and that's stuck with me — I'm active in the school's Computer Science and Research Clubs, where I get to dig into new tech and work on problems that aren't just out of a textbook.",
+    "I am a junior at Acton-Boxborough Regional High School. I got into computer science because it felt intriguing, and as if my ideas came to life. Also, I participate my school's Computer Science and Research Clubs, where I get to work on my ideas and formulate them into products and thinsg that reel in new students year after year, and make me feel proud of myself.",
     "As Co-President of the Acton Institute of Computer Science, I teach advanced Python and help other students get into programming. I've also spent the last few summers in AI and robotics programs, including the MIT Jameel Clinic AI & Health Bootcamp, Inspirit AI, and a research internship with Mitsubishi Electric Research Laboratories.",
-    "Outside of tech, I'm a Second Dan black belt and USA Taekwondo certified referee, I play in my school's marching band, and I serve as a School Committee Representative. I've also picked up the President's Volunteer Service Award (Gold) twice, for logging over 100 hours of community service each year.",
+    "Outside of computer science, I am a Second Dan black belt and USA Taekwondo certified referee, I play in my school's marching band, and I serve as a School Committee Representative. I have also earned the President's Volunteer Service Award (Gold) twice, for logging over 100 hours of community service each year.",
   ],
 
   quickFacts: [
