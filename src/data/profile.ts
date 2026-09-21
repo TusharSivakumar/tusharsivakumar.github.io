@@ -94,7 +94,7 @@ export const experience: ExperienceItem[] = [
     period: "Jul 2026",
     location: "Cambridge, MA",
     description:
-      "A selective week-long bootcamp on applications of AI in healthcare, taught by MIT professors and practicing doctors.",
+      "Got into this competitive week-long bootcamp on AI in healthcare, taught by MIT faculty and doctors who actually use this stuff in practice.",
     tags: ["Machine Learning", "Neural Networks", "CNNs", "Data Analysis"],
   },
   {
@@ -103,7 +103,7 @@ export const experience: ExperienceItem[] = [
     period: "Jun 2026 - Jul 2026",
     location: "Remote",
     description:
-      "An intensive program on the fundamentals of AI and how to build it in code, culminating in a team project and presentation.",
+      "Went deep on the fundamentals of AI and how to actually build it in code, then wrapped up with a team project and presentation.",
     tags: ["Python", "Machine Learning", "Presentation Skills"],
   },
   {
@@ -112,7 +112,7 @@ export const experience: ExperienceItem[] = [
     period: "Jul 2025 - Aug 2025",
     location: "Waltham, MA",
     description:
-      "A hands-on course in electronics and robotics — building circuits and control systems with Arduino.",
+      "Spent the summer building circuits and control systems with Arduino in a hands-on electronics and robotics course.",
     tags: ["Arduino", "C++", "Electrical Wiring", "Motor Control"],
   },
   {
@@ -121,7 +121,7 @@ export const experience: ExperienceItem[] = [
     period: "Jun 2025 - Jul 2025",
     location: "Remote",
     description:
-      "Applied machine learning to cryptocurrency trading strategies in a mentored high-school research program.",
+      "Worked with a mentor to apply machine learning to crypto trading strategies as part of a high-school research program.",
     tags: ["Machine Learning", "Data Analysis"],
   },
   {
@@ -130,7 +130,7 @@ export const experience: ExperienceItem[] = [
     period: "Jun 2024 - Aug 2024",
     location: "Remote",
     description:
-      "Contributed to the SMART-101 effort — authoring problems to benchmark and improve LLMs' ability to solve grade-school Math Olympiad-style reasoning tasks.",
+      "Wrote problems for SMART-101, a dataset MERL uses to benchmark how well LLMs solve grade-school Math Olympiad-style reasoning tasks.",
     tags: ["Python", "LLMs", "Research"],
   },
   {
@@ -139,7 +139,7 @@ export const experience: ExperienceItem[] = [
     period: "Jun 2023 - Jul 2023",
     location: "Remote",
     description:
-      "Learned robotics and programming with Arduino and Raspberry Pi, including an introduction to computer vision.",
+      "First real exposure to robotics — programmed with Arduino and Raspberry Pi and got an intro to computer vision.",
     tags: ["Robotics", "Computer Vision", "Raspberry Pi"],
   },
   {
@@ -245,7 +245,7 @@ export const projects: Project[] = [
   {
     title: "SMART-101 — LLM Math Reasoning",
     description:
-      "Research at Mitsubishi Electric Research Labs authoring problems to benchmark and improve large language models on grade-school Math Olympiad reasoning.",
+      "Wrote benchmark problems for MERL's SMART-101 dataset, used to test and improve how well LLMs handle grade-school Math Olympiad reasoning.",
     technologies: ["Python", "LLMs", "Research"],
     emoji: "\u{1F9E0}",
     badge: "Research",
@@ -253,7 +253,7 @@ export const projects: Project[] = [
   {
     title: "FRC Competition Robotics",
     description:
-      "Member of my school's FIRST Robotics Competition team, contributing to build-season engineering for a competition robot.",
+      "On my school's FIRST Robotics Competition team, helping build our competition robot during build season.",
     technologies: ["Robotics", "CAD", "Java"],
     emoji: "\u{1F916}",
     badge: "Robotics",
@@ -261,7 +261,7 @@ export const projects: Project[] = [
   {
     title: "This Website",
     description:
-      "A personal site built from scratch with React, TypeScript, and Tailwind, deployed on GitHub Pages.",
+      "Built this site from scratch with React, TypeScript, and Tailwind, and deployed it on GitHub Pages.",
     technologies: ["React", "TypeScript", "Tailwind CSS"],
     emoji: "\u{1F310}",
     link: "https://github.com/TusharSivakumar/tusharsivakumar.github.io",
