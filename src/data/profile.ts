@@ -15,13 +15,13 @@ export const profile = {
 
   hero: {
     blurb:
-      "I'm a high schooler from Acton, MA exploring the intersection of computer science, AI, and robotics — through research programs, teaching, and building things that solve real problems.",
+      "I'm a high schooler from Acton, MA. Most of my time goes into computer science, AI, and robotics — through research programs, teaching, and just building things.",
   },
 
   about: [
-    "I'm a student at Acton-Boxborough Regional High School with a strong interest in computer science, research, leadership, and community service. Through my school's Computer Science and Research Clubs, I explore emerging technologies, sharpen my technical skills, and apply problem-solving to real-world challenges.",
-    "As Co-President of the Acton Institute of Computer Science, I teach advanced Python and help other students get into programming. I've spent recent summers in AI and robotics programs — including the MIT Jameel Clinic AI & Health Bootcamp, Inspirit AI, and a research internship with Mitsubishi Electric Research Laboratories.",
-    "Outside of tech, I'm a Second Dan black belt and USA Taekwondo certified referee, a member of my school's marching band, and a School Committee Representative. I'm a two-time recipient of the President's Volunteer Service Award (Gold) for over 100 hours of community service each year.",
+    "I'm a student at Acton-Boxborough Regional High School. I got into computer science because I liked figuring out how things work, and that's stuck with me — I'm active in the school's Computer Science and Research Clubs, where I get to dig into new tech and work on problems that aren't just out of a textbook.",
+    "As Co-President of the Acton Institute of Computer Science, I teach advanced Python and help other students get into programming. I've also spent the last few summers in AI and robotics programs, including the MIT Jameel Clinic AI & Health Bootcamp, Inspirit AI, and a research internship with Mitsubishi Electric Research Laboratories.",
+    "Outside of tech, I'm a Second Dan black belt and USA Taekwondo certified referee, I play in my school's marching band, and I serve as a School Committee Representative. I've also picked up the President's Volunteer Service Award (Gold) twice, for logging over 100 hours of community service each year.",
   ],
 
   quickFacts: [

@@ -28,11 +28,11 @@ const Contact = () => {
             Contact
           </p>
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-            Let's build something.
+            Get in touch.
           </h2>
           <p className="mt-4 text-[16px] leading-[1.6] text-white/85 max-w-lg mx-auto">
-            I'm always open to interesting projects, collaborations, and
-            conversations. Reach out any time.
+            Have a project, opportunity, or just want to talk shop? Send me
+            an email or find me on LinkedIn.
           </p>
 
           {email ? (
