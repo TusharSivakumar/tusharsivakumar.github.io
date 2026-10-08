@@ -2,8 +2,9 @@
 
 The robot model is MuJoCo Menagerie's `unitree_g1/scene_mjx.xml` (29 joints,
 simplified colliders). The policy controls the 12 leg joints: it outputs joint
-position offsets at 50 Hz, and the model's PD position actuators (250 Hz
-physics, torque-limited) track them. Waist and arms hold their default pose.
+position offsets at 50 Hz on top of a gait-clock reference trajectory, and the
+model's PD position actuators (250 Hz physics, torque-limited) track them.
+Waist and arms hold their default pose.
 
 Observations follow the policy spec in the doc:
   actor  : pelvis gyro, projected gravity, command, leg joint pos/vel, previous

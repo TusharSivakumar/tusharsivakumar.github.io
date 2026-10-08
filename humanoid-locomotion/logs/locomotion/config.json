@@ -1,0 +1,12 @@
+{
+  "iterations": 20000,
+  "num_envs": 256,
+  "workers": 4,
+  "steps_per_env": 24,
+  "seed": 0,
+  "run": "locomotion",
+  "save_every": 100,
+  "tracking_threshold": 0.7,
+  "resume": "",
+  "max_minutes": 110.0
+}

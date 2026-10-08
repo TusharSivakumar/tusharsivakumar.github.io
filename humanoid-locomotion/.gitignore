@@ -1,4 +1,5 @@
-logs/
+logs/*/model_[0-9]*.pt
+logs/*.log
 __pycache__/
 train.log
 mujoco_menagerie

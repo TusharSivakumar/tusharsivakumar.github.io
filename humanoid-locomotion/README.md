@@ -21,6 +21,21 @@ python train.py --num-envs 256 --workers 4 --max-minutes 150                    
 MUJOCO_GL=egl python evaluate.py --checkpoint logs/locomotion/model_final.pt    # -> results/
 ```
 
+## Results (in `results/`, from `logs/locomotion/model_final.pt`)
+
+27.8 M steps, 110 minutes on 4 CPU cores, ending at curriculum level 4 (full randomization, 0.7 m/s pushes).
+
+| Metric | Result |
+| --- | --- |
+| Survival, 20 s episodes, random commands, nominal robot | 100 % |
+| Survival, full randomization + 0.5 m/s pushes every 6 s | 50 % |
+| Push recovery while walking at 0.5 m/s | 100 % at 0.5, 96 % at 0.75, 46 % at 1.0 m/s |
+| Velocity tracking error (steady state, 10 commands) | 0.35 m/s |
+| Forward speed for 0.5 / 1.0 / 1.5 m/s commands | 0.23 / 0.45 / 0.63 m/s |
+| Turning on command | Not learned (yaw-rate error ~1 rad/s) |
+
+`results/rollout.mp4` / `rollout.gif` show a scripted run; `training_curves.png` the training curves.
+
 ## Setup at a glance
 
 - **Robot:** MuJoCo Menagerie `unitree_g1/scene_mjx.xml` (29 joints, 33 kg, simplified colliders).
