@@ -23,7 +23,6 @@ from vec_env import STAT_KEYS, VecEnv
 CMD_START = np.array([[-0.3, 0.6], [-0.2, 0.2], [-0.3, 0.3]])
 CMD_MAX = np.array([[-0.5, 1.5], [-0.5, 0.5], [-1.0, 1.0]])
 CMD_STEP = np.array([[-0.1, 0.15], [-0.05, 0.05], [-0.1, 0.1]])
-TRACKING_THRESHOLD = 0.8   # fraction of max linear-velocity tracking reward
 PUSH_START_LEVEL = 2       # pushes switch on at this curriculum level
 PUSH_MAX = 1.0             # m/s
 DR_START, DR_PER_LEVEL = 0.25, 0.25   # domain-randomization strength: 0.25 -> 1.0 by level 3
@@ -38,6 +37,9 @@ def main():
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--run", default="locomotion")
     ap.add_argument("--save-every", type=int, default=100)
+    ap.add_argument("--tracking-threshold", type=float, default=0.7,
+                    help="advance the curriculum when mean linear-velocity tracking reward exceeds this (max 1)")
+    ap.add_argument("--resume", default="", help="checkpoint to continue from (weights, normalizers, curriculum)")
     ap.add_argument("--max-minutes", type=float, default=0, help="stop early after this wall time (0 = off)")
     args = ap.parse_args()
 
@@ -56,19 +58,36 @@ def main():
     ppo = PPO(ac, entropy_coef=0.003)
 
     cmd_ranges, level, push_vel = CMD_START.copy(), 0, 0.0
-    venv.set_attr(cmd_ranges=cmd_ranges, push_vel=push_vel, dr_scale=DR_START)
+    start_it, total_steps = 1, 0
+    if args.resume:
+        ckpt = torch.load(args.resume, weights_only=False)
+        ac.load_state_dict(ckpt["model"])
+        level, cmd_ranges, push_vel = ckpt["level"], np.array(ckpt["cmd_ranges"]), ckpt["push_vel"]
+        start_it = ckpt.get("iteration") or int(os.path.basename(args.resume).split("_")[1].split(".")[0])
+        start_it += 1
+    venv.set_attr(cmd_ranges=cmd_ranges, push_vel=push_vel, dr_scale=min(1.0, DR_START + DR_PER_LEVEL * level))
     obs, priv = venv.reset()
     obs, priv = torch.from_numpy(obs), torch.from_numpy(priv)
 
     N, T = args.num_envs, args.steps_per_env
     ep_ret, ep_len = np.zeros(N), np.zeros(N)
     done_returns, done_lengths = [], []
-    log_f = open(os.path.join(out, "progress.csv"), "w", newline="")
+    csv_path = os.path.join(out, "progress.csv")
+    appending = bool(args.resume) and os.path.exists(csv_path)
+    minutes_before = 0.0
+    if appending:  # keep the log up to the checkpoint, continue counting steps and time from there
+        with open(csv_path) as f:
+            rows = [r for r in csv.DictReader(f) if int(r["iteration"]) < start_it]
+        total_steps, minutes_before = int(rows[-1]["env_steps"]), float(rows[-1]["minutes"])
+        with open(csv_path, "w", newline="") as f:
+            w = csv.DictWriter(f, fieldnames=list(rows[0]))
+            w.writeheader()
+            w.writerows(rows)
+    log_f = open(csv_path, "a" if appending else "w", newline="")
     writer = None
     start = time.time()
-    total_steps = 0
 
-    for it in range(1, args.iterations + 1):
+    for it in range(start_it, args.iterations + 1):
         # Entropy coefficient 0.003 -> 0.001 over training (doc: "lower late")
         ppo.entropy_coef = 0.003 + (0.001 - 0.003) * min(1.0, it / (0.7 * args.iterations))
         buf = {k: [] for k in ["obs", "priv", "act", "logp", "mu", "std", "rew", "done", "val"]}
@@ -111,7 +130,7 @@ def main():
         # Curriculum
         stats_mean = stat_sum / T
         tracking = stats_mean[0]
-        if tracking > TRACKING_THRESHOLD and level < 12:
+        if tracking > args.tracking_threshold and level < 12:
             level += 1
             cmd_ranges = np.clip(cmd_ranges + CMD_STEP, CMD_MAX[:, :1], CMD_MAX[:, 1:])
             if level >= PUSH_START_LEVEL:
@@ -122,7 +141,7 @@ def main():
         recent_r = np.mean(done_returns[-100:]) if done_returns else 0.0
         recent_l = np.mean(done_lengths[-100:]) if done_lengths else 0.0
         row = {
-            "iteration": it, "env_steps": total_steps, "minutes": (time.time() - start) / 60,
+            "iteration": it, "env_steps": total_steps, "minutes": minutes_before + (time.time() - start) / 60,
             "episode_return": recent_r, "episode_length_s": recent_l * 0.02,
             "lin_vel_tracking": tracking, "yaw_rate_tracking": stats_mean[1],
             "vel_error_mps": stats_mean[2], "falls_per_1k_steps": stats_mean[3] * 1000,
@@ -132,7 +151,8 @@ def main():
         }
         if writer is None:
             writer = csv.DictWriter(log_f, fieldnames=list(row))
-            writer.writeheader()
+            if not appending:
+                writer.writeheader()
         writer.writerow(row)
         log_f.flush()
         if it % 10 == 0 or it == 1:
@@ -140,12 +160,12 @@ def main():
                   f"| track {tracking:.2f} | verr {stats_mean[2]:.2f} | lvl {level} | push {push_vel:.1f} "
                   f"| std {row['action_std']:.2f} | {row['steps_per_s']:.0f} sps", flush=True)
         if it % args.save_every == 0:
-            save(ac, out, f"model_{it}.pt", level, cmd_ranges, push_vel)
+            save(ac, out, f"model_{it}.pt", level, cmd_ranges, push_vel, it, total_steps)
         if args.max_minutes and (time.time() - start) / 60 > args.max_minutes:
             print("time budget reached", flush=True)
             break
 
-    save(ac, out, "model_final.pt", level, cmd_ranges, push_vel)
+    save(ac, out, "model_final.pt", level, cmd_ranges, push_vel, it, total_steps)
     warnings.filterwarnings("ignore", category=FutureWarning)
     scripted = torch.jit.trace(DeployPolicy(ac).eval(), torch.zeros(1, obs_dim))
     scripted.save(os.path.join(out, "policy.pt"))
@@ -153,9 +173,9 @@ def main():
     print("done", out)
 
 
-def save(ac, out, name, level, cmd_ranges, push_vel):
+def save(ac, out, name, level, cmd_ranges, push_vel, iteration, env_steps):
     torch.save({"model": ac.state_dict(), "level": level, "cmd_ranges": cmd_ranges.tolist(),
-                "push_vel": push_vel}, os.path.join(out, name))
+                "push_vel": push_vel, "iteration": iteration, "env_steps": env_steps}, os.path.join(out, name))
 
 
 if __name__ == "__main__":

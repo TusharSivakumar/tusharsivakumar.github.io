@@ -31,14 +31,21 @@ HISTORY = 3
 ACTION_SCALE = 0.25     # rad per unit action
 GAIT_PERIOD = 0.8       # s, one full left + right stride
 NUM_LEG = 12            # first 12 actuators are the legs
+SWING_HEIGHT = 0.08     # m, target foot clearance during swing
+REF_AMP = 0.25          # rad, reference-gait swing amplitude (hip pitch; knee gets 2x, ankle 1x)
 
 # Reward weights (doc "Reward design" table, plus a small pose term for the
 # hip roll/yaw joints); every term is multiplied by CTRL_DT.
+# Tuned from the doc's starting values: with lin_vel_tracking 1.0, gait_phase_contact
+# 0.2 and air time (t - 0.4), the policy settled on standing still and ignoring
+# velocity commands. Tracking and stepping are weighted up, the stepping rhythm is
+# enforced at every command (the robot marches in place at zero command), and a
+# dense swing-foot height term pulls the swing foot to SWING_HEIGHT.
 REWARD_WEIGHTS = {
-    "lin_vel_tracking": 1.0,
+    "lin_vel_tracking": 2.0,
     "yaw_rate_tracking": 0.5,
     "feet_air_time": 1.0,
-    "gait_phase_contact": 0.2,
+    "gait_phase_contact": 1.0,
     "base_height": -10.0,
     "orientation": -1.0,
     "vertical_velocity": -2.0,
@@ -49,6 +56,7 @@ REWARD_WEIGHTS = {
     "foot_slip": -0.1,
     "body_contact": -1.0,
     "hip_pose": -0.5,
+    "feet_swing_height": -20.0,
     "termination": -200.0,
 }
 
@@ -98,6 +106,12 @@ class HumanoidLocoEnv:
         lo, hi = m.jnt_range[jids[:NUM_LEG], 0], m.jnt_range[jids[:NUM_LEG], 1]
         mid, half = (lo + hi) / 2, (hi - lo) / 2
         self.soft_lo, self.soft_hi = mid - 0.9 * half, mid + 0.9 * half
+        # Reference gait: on the swing leg (per the gait clock) flex hip, knee and ankle
+        # so the foot lifts; the policy learns a residual on top of it.
+        self.ref_shape = np.zeros((2, self.nu))
+        for k, side in enumerate(("left", "right")):
+            for joint, gain in (("hip_pitch", -1.0), ("knee", 2.0), ("ankle_pitch", -1.0)):
+                self.ref_shape[k, self.joint_names.index(f"{side}_{joint}_joint")] = gain * REF_AMP
         self.hip_ry = np.array([i for i, n in enumerate(self.joint_names) if "hip_roll" in n or "hip_yaw" in n])
 
         self.pelvis = m.body("pelvis").id
@@ -253,7 +267,9 @@ class HumanoidLocoEnv:
         action = np.clip(action, -1.0, 1.0)
         applied = self.prev_applied if self.delay else action
         self.prev_applied = action
-        d.ctrl[:NUM_LEG] = self.q_default + ACTION_SCALE * applied
+        s = self._phase()[0]
+        ref = max(0.0, -s) * self.ref_shape[0] + max(0.0, s) * self.ref_shape[1]
+        d.ctrl[:NUM_LEG] = self.q_default + ref + ACTION_SCALE * applied
         mujoco.mj_step(m, d, nstep=DECIMATION)
         self._bq = None
         tau = d.actuator_force[:NUM_LEG]
@@ -273,19 +289,20 @@ class HumanoidLocoEnv:
         qvel = d.qvel[self.vadr]
         qpos = d.qpos[self.qadr]
         feet, bad = self._contacts()
-        moving = np.linalg.norm(self.cmd[:2]) > 0.1 or abs(self.cmd[2]) > 0.2
 
-        # Feet air time: rewarded on touchdown
+        # Feet air time: rewarded on touchdown for swings of 0.25 s or longer (capped at 0.5 s)
         first_contact = feet & ~self.last_contact
         self.air_time += CTRL_DT
-        air_r = np.sum((self.air_time - 0.4) * first_contact) if moving else 0.0
+        air_r = np.sum((np.minimum(self.air_time, 0.5) - 0.25) * first_contact)
         self.air_time[feet] = 0.0
         self.last_contact = feet
 
         # Phase: left foot in stance when sin >= 0, right when sin < 0
         s = self._phase()[0]
-        want_stance = np.array([s >= 0, s < 0]) if moving else np.array([True, True])
+        want_stance = np.array([s >= 0, s < 0])
         phase_r = np.mean(feet == want_stance)
+        foot_z = d.site_xpos[self.foot_sites, 2]
+        swing_r = np.sum((foot_z - SWING_HEIGHT) ** 2 * ~want_stance)
 
         feet_xy = d.site_xpos[self.foot_sites, :2]
         foot_v = (feet_xy - self.feet_prev) / CTRL_DT
@@ -307,6 +324,7 @@ class HumanoidLocoEnv:
             "joint_limits": np.sum(np.clip(self.soft_lo - qpos, 0, None) + np.clip(qpos - self.soft_hi, 0, None)),
             "foot_slip": np.sum(np.sum(foot_v**2, axis=1) * feet),
             "body_contact": float(bad),
+            "feet_swing_height": swing_r,
             "hip_pose": np.sum((qpos[self.hip_ry] - self.q_default[self.hip_ry]) ** 2),
             "termination": float(fell),
         }
